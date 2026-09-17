@@ -45,11 +45,31 @@ public partial class App : Application
         TaskScheduler.UnobservedTaskException += (_, e) => { Log.Error("Unobserved task exception", e.Exception); e.SetObserved(); };
     }
 
+    /// <summary>
+    /// FolderBox launches other programs, so its environment must not carry Electron/VS Code process
+    /// variables inherited from whoever started it (a terminal inside VS Code, a build task, ...):
+    /// with ELECTRON_RUN_AS_NODE=1 an Electron app such as VS Code starts headless and exits silently.
+    /// </summary>
+    private static void ScrubInheritedLauncherEnvironment()
+    {
+        var removed = new List<string>();
+        foreach (System.Collections.DictionaryEntry entry in Environment.GetEnvironmentVariables())
+        {
+            var name = entry.Key as string;
+            if (name is null) continue;
+            if (name.StartsWith("ELECTRON_", StringComparison.OrdinalIgnoreCase) || name.StartsWith("VSCODE_", StringComparison.OrdinalIgnoreCase))
+                removed.Add(name);
+        }
+        foreach (var name in removed) Environment.SetEnvironmentVariable(name, null);
+        if (removed.Count > 0) Log.Info($"Removed inherited launcher environment: {string.Join(", ", removed)}");
+    }
+
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _persistence = new PersistenceService();
         Log.Initialize(_persistence.LogDirectory);
         Log.Info($"FolderBox starting (pid {Environment.ProcessId}, {Environment.OSVersion}, args: {Environment.CommandLine})");
+        ScrubInheritedLauncherEnvironment();
 
         // "--new <path>" comes from Explorer's New > FolderBox menu; <path> is the file the shell would
         // have created, so its directory is where the user right-clicked.
