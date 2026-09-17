@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="FolderBox.App.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="FolderBox Settings">
+
+    <Grid x:Name="Root">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="TitleBar" Grid.Row="0" Height="40" Padding="16,0,0,0">
+            <TextBlock Text="Settings" FontSize="12" VerticalAlignment="Center" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" Padding="24,0,24,24" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="6" HorizontalAlignment="Stretch">
+                <TextBlock Text="General" FontSize="16" FontWeight="SemiBold" Margin="0,4,0,6" />
+
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Start FolderBox with Windows" VerticalAlignment="Center" />
+                    <ToggleSwitch x:Name="StartWithWindows" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Theme" VerticalAlignment="Center" />
+                    <ComboBox x:Name="Theme" HorizontalAlignment="Right" MinWidth="140" SelectionChanged="Setting_Changed">
+                        <ComboBoxItem Content="System" />
+                        <ComboBoxItem Content="Light" />
+                        <ComboBoxItem Content="Dark" />
+                    </ComboBox>
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Align widgets to grid" VerticalAlignment="Center" />
+                    <ToggleSwitch x:Name="AlignToGrid" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Use the Windows desktop icon grid" />
+                        <TextBlock Text="Tiles get the size of a desktop icon and line up with them" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                    <ToggleSwitch x:Name="UseDesktopGrid" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Close panel when clicking outside" VerticalAlignment="Center" />
+                    <ToggleSwitch x:Name="CloseOnOutside" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Show item count under folders" VerticalAlignment="Center" />
+                    <ToggleSwitch x:Name="ShowItemCount" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Show FolderBox in the desktop 'New' menu" />
+                        <TextBlock Text="Right-click the desktop > New > FolderBox" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                    <ToggleSwitch x:Name="AddToNewMenu" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Lock all widgets" VerticalAlignment="Center" />
+                    <ToggleSwitch x:Name="LockAll" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+
+                <TextBlock Text="Layout" FontSize="16" FontWeight="SemiBold" Margin="0,18,0,6" />
+
+                <Grid Style="{StaticResource SettingRow}" x:Name="GridSizeRow">
+                    <TextBlock Text="Grid size (px, FolderBox grid only)" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <NumberBox x:Name="GridWidth" Minimum="80" Maximum="200" SmallChange="10" SpinButtonPlacementMode="Compact" Width="110" ValueChanged="Setting_Changed" AutomationProperties.Name="Grid width" />
+                        <TextBlock Text="×" VerticalAlignment="Center" />
+                        <NumberBox x:Name="GridHeight" Minimum="80" Maximum="200" SmallChange="10" SpinButtonPlacementMode="Compact" Width="110" ValueChanged="Setting_Changed" AutomationProperties.Name="Grid height" />
+                    </StackPanel>
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Panel width (px)" VerticalAlignment="Center" />
+                    <NumberBox x:Name="PanelWidth" Minimum="320" Maximum="720" SmallChange="20" SpinButtonPlacementMode="Compact" Width="110" HorizontalAlignment="Right" ValueChanged="Setting_Changed" AutomationProperties.Name="Panel width" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
+                    <TextBlock Text="Panel max height (px)" VerticalAlignment="Center" />
+                    <NumberBox x:Name="PanelMaxHeight" Minimum="300" Maximum="900" SmallChange="20" SpinButtonPlacementMode="Compact" Width="110" HorizontalAlignment="Right" ValueChanged="Setting_Changed" AutomationProperties.Name="Panel max height" />
+                </Grid>
+
+                <TextBlock x:Name="DataPathText" FontSize="11" Margin="0,18,0,0"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

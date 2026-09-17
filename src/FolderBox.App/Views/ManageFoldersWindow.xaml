@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="FolderBox.App.Views.ManageFoldersWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:FolderBox.App.ViewModels"
+    xmlns:views="using:FolderBox.App.Views"
+    Title="FolderBox">
+
+    <Grid x:Name="Root">
+        <Grid.Resources>
+            <SolidColorBrush x:Key="Glass" Color="#14FFFFFF" />
+            <SolidColorBrush x:Key="GlassHover" Color="#22FFFFFF" />
+            <SolidColorBrush x:Key="GlassStroke" Color="#22FFFFFF" />
+            <SolidColorBrush x:Key="GlassStrong" Color="#2EFFFFFF" />
+            <Style x:Key="GlassCard" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource Glass}" />
+                <Setter Property="BorderBrush" Value="{StaticResource GlassStroke}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="14" />
+            </Style>
+            <Style x:Key="RoundButton" TargetType="Button">
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Height" Value="40" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="20" />
+                <Setter Property="Background" Value="{StaticResource Glass}" />
+                <Setter Property="BorderBrush" Value="{StaticResource GlassStroke}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+            <Style x:Key="NavItem" TargetType="ListViewItem">
+                <Setter Property="MinHeight" Value="44" />
+                <Setter Property="Padding" Value="12,0,12,0" />
+                <Setter Property="Margin" Value="0,0,0,4" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+            <Style x:Key="CardItem" TargetType="GridViewItem">
+                <Setter Property="Margin" Value="0,0,12,12" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="14" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            </Style>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar (drag region) -->
+        <Grid x:Name="TitleBar" Grid.Row="0" Height="40" />
+
+        <!-- First run -->
+        <StackPanel Grid.Row="2" Visibility="{x:Bind views:Bind.VisibleIf(ViewModel.IsEmpty), Mode=OneWay}"
+                    VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" MaxWidth="400">
+            <views:FolderBoxIcon Width="80" Height="80" Margin="0,0,0,8" />
+            <TextBlock Text="FolderBox" FontSize="28" FontWeight="SemiBold" HorizontalAlignment="Center" />
+            <TextBlock Text="Your desktop folders, expandable." FontSize="14" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" Margin="0,16,0,0">
+                <Button Content="Create a new FolderBox" Style="{ThemeResource AccentButtonStyle}" Click="NewFolderBox_Click" />
+                <Button Content="Add an existing folder…" Click="AddFolder_Click" />
+            </StackPanel>
+            <TextBlock Text="Tip: right-click the desktop → New → FolderBox" FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+        </StackPanel>
+
+        <!-- Header -->
+        <Grid Grid.Row="1" Padding="28,4,24,16" ColumnSpacing="16"
+              Visibility="{x:Bind views:Bind.CollapsedIf(ViewModel.IsEmpty), Mode=OneWay}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <views:FolderBoxIcon x:Name="HeaderIcon" Width="64" Height="64" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                <Grid>
+                    <TextBlock x:Name="NameText" Text="{x:Bind ViewModel.HeaderTitle, Mode=OneWay}" FontSize="24" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBox x:Name="RenameBox" Visibility="Collapsed" FontSize="18" MaxWidth="420" HorizontalAlignment="Left" KeyDown="RenameBox_KeyDown" LostFocus="RenameBox_LostFocus" />
+                </Grid>
+                <TextBlock Text="{x:Bind ViewModel.HeaderSubtitle, Mode=OneWay}" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" IsTextSelectionEnabled="True" />
+            </StackPanel>
+            <AutoSuggestBox Grid.Column="2" x:Name="SearchBox" Width="300" VerticalAlignment="Center" QueryIcon="Find"
+                            PlaceholderText="Search…" TextChanged="SearchBox_TextChanged" CornerRadius="10" />
+            <Border Grid.Column="3" Style="{StaticResource GlassCard}" CornerRadius="12" Padding="3" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <ToggleButton x:Name="GridToggle" Width="40" Height="34" Padding="0" CornerRadius="10" IsChecked="True" Click="GridToggle_Click" AutomationProperties.Name="Grid view"><FontIcon Glyph="&#xF0E2;" FontSize="14" /></ToggleButton>
+                    <ToggleButton x:Name="ListToggle" Width="40" Height="34" Padding="0" CornerRadius="10" Click="ListToggle_Click" AutomationProperties.Name="List view"><FontIcon Glyph="&#xEA37;" FontSize="14" /></ToggleButton>
+                </StackPanel>
+            </Border>
+            <Button Grid.Column="4" x:Name="MoreButton" Style="{StaticResource RoundButton}" VerticalAlignment="Center" AutomationProperties.Name="More actions">
+                <FontIcon Glyph="&#xE712;" FontSize="14" />
+                <Button.Flyout>
+                    <MenuFlyout x:Name="MoreMenu" Placement="BottomEdgeAlignedRight">
+                        <MenuFlyoutItem x:Name="MenuRename" Text="Rename" Click="Rename_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8AC;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                        <MenuFlyoutItem x:Name="MenuLocate" Text="Locate / change folder…" Click="Locate_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8DA;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                        <MenuFlyoutItem x:Name="MenuExplorer" Text="Open in Explorer" Click="OpenExplorer_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8A7;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                        <ToggleMenuFlyoutItem x:Name="MenuLock" Text="Lock position" Click="Lock_Click" />
+                        <ToggleMenuFlyoutItem x:Name="MenuShow" Text="Show on desktop" Click="Show_Click" />
+                        <MenuFlyoutSeparator x:Name="MenuSep1" />
+                        <MenuFlyoutItem x:Name="MenuRemove" Text="Remove from FolderBox" Click="Remove_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE74D;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                        <MenuFlyoutSeparator x:Name="MenuSep2" />
+                        <MenuFlyoutItem Text="Add an existing folder…" Click="AddFolder_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8F4;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Create desktop shortcut" Click="Shortcut_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8B7;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                        <MenuFlyoutItem Text="Settings" Click="Settings_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE713;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </Grid>
+
+        <!-- Body -->
+        <Grid Grid.Row="2" Visibility="{x:Bind views:Bind.CollapsedIf(ViewModel.IsEmpty), Mode=OneWay}" BorderThickness="0,1,0,0" BorderBrush="{StaticResource GlassStroke}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: navigation -->
+            <Grid Grid.Column="0" Padding="16,16,8,16" BorderThickness="0,0,1,0" BorderBrush="{StaticResource GlassStroke}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ListView Grid.Row="0" x:Name="OverviewNav" SelectionMode="Single" ItemContainerStyle="{StaticResource NavItem}" SelectionChanged="OverviewNav_SelectionChanged">
+                    <ListViewItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE80F;" FontSize="16" />
+                            <TextBlock Text="Overview" FontSize="14" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ListViewItem>
+                </ListView>
+                <TextBlock Grid.Row="1" Text="FOLDERBOXES" FontSize="11" FontWeight="SemiBold" Margin="12,12,0,8" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                <ListView Grid.Row="2" x:Name="BoxNav" ItemsSource="{x:Bind ViewModel.Items}" SelectionMode="Single" ItemContainerStyle="{StaticResource NavItem}" SelectionChanged="BoxNav_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ManageItemViewModel">
+                            <Grid ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <views:FolderBoxIcon Width="26" Height="26" Design="{x:Bind IconStyle, Mode=OneWay}" Tint="{x:Bind IconColor, Mode=OneWay}" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind DisplayName, Mode=OneWay}" FontSize="14" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <Border Grid.Column="2" Background="{StaticResource GlassStrong}" CornerRadius="10" Padding="8,2,8,2" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ItemCountText, Mode=OneWay}" FontSize="11" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Button Grid.Row="3" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" CornerRadius="12" Height="40" Click="NewFolderBox_Click" AutomationProperties.Name="New FolderBox">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE710;" FontSize="14" /><TextBlock Text="New FolderBox" /></StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- Centre: cards -->
+            <Grid Grid.Column="1" Padding="24,16,12,16" RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Style="{StaticResource RoundButton}" Width="34" Height="34" CornerRadius="17" Click="Back_Click"
+                            Visibility="{x:Bind views:Bind.VisibleIf(ViewModel.CanGoBack), Mode=OneWay}" AutomationProperties.Name="Back">
+                        <FontIcon Glyph="&#xE72B;" FontSize="12" />
+                    </Button>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Bind ViewModel.SectionTitle, Mode=OneWay}" FontSize="18" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Breadcrumbs}" Visibility="{x:Bind views:Bind.VisibleIf(ViewModel.IsBrowsing), Mode=OneWay}">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BreadcrumbSegment">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <HyperlinkButton Content="{x:Bind Label}" Tag="{x:Bind Path}" Padding="2,0,2,0" FontSize="12" IsEnabled="{x:Bind views:Bind.Not(IsLast)}" Click="Breadcrumb_Click" />
+                                        <FontIcon Glyph="&#xE76C;" FontSize="9" Margin="2,0,2,0" Foreground="{ThemeResource TextFillColorTertiaryBrush}" Visibility="{x:Bind views:Bind.CollapsedIf(IsLast)}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <Button Grid.Column="2" x:Name="NewButton" CornerRadius="16" Height="34" Padding="14,0,14,0" Background="{StaticResource Glass}" BorderBrush="{StaticResource GlassStroke}" AutomationProperties.Name="New">
+                        <StackPanel Orientation="Horizontal" Spacing="6"><FontIcon Glyph="&#xE710;" FontSize="12" /><TextBlock Text="New" FontSize="13" /></StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuFlyoutItem Text="New folder here" Click="NewSubfolder_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8F4;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                                <MenuFlyoutItem Text="Add files…" Click="AddFiles_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE8E5;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="New FolderBox" Click="NewFolderBox_Click"><MenuFlyoutItem.Icon><FontIcon Glyph="&#xE710;" /></MenuFlyoutItem.Icon></MenuFlyoutItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+
+                <!-- Overview: FolderBox cards -->
+                <GridView Grid.Row="1" x:Name="OverviewGrid" ItemContainerStyle="{StaticResource CardItem}" SelectionMode="Single"
+                          DoubleTapped="OverviewGrid_DoubleTapped" SelectionChanged="OverviewGrid_SelectionChanged" Padding="0,4,0,0">
+                    <GridView.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" ItemWidth="196" ItemHeight="168" /></ItemsPanelTemplate></GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ManageItemViewModel">
+                            <Border Style="{StaticResource GlassCard}" Padding="20,18,16,16">
+                                <StackPanel Spacing="4">
+                                    <views:FolderBoxIcon Width="56" Height="56" HorizontalAlignment="Left" Design="{x:Bind IconStyle, Mode=OneWay}" Tint="{x:Bind IconColor, Mode=OneWay}" />
+                                    <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" FontSize="16" FontWeight="SemiBold" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind ItemCountText, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+
+                <!-- Overview: FolderBoxes as a list -->
+                <ListView Grid.Row="1" x:Name="OverviewList" SelectionMode="Single" Visibility="Collapsed"
+                          DoubleTapped="OverviewGrid_DoubleTapped" SelectionChanged="OverviewList_SelectionChanged" Padding="0">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="MinHeight" Value="52" />
+                            <Setter Property="Padding" Value="12,0,12,0" />
+                            <Setter Property="CornerRadius" Value="10" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ManageItemViewModel">
+                            <Grid ColumnSpacing="12" Height="48">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="36" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <views:FolderBoxIcon Width="32" Height="32" VerticalAlignment="Center" Design="{x:Bind IconStyle, Mode=OneWay}" Tint="{x:Bind IconColor, Mode=OneWay}" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind FolderPath, Mode=OneWay}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{x:Bind ItemCountText, Mode=OneWay}" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Browsing: folders and files as cards -->
+                <GridView Grid.Row="1" x:Name="ContentsGrid" ItemsSource="{x:Bind ViewModel.Contents, Mode=OneWay}" ItemContainerStyle="{StaticResource CardItem}" SelectionMode="Single"
+                          Visibility="Collapsed"
+                          ContainerContentChanging="Contents_ContainerContentChanging" DoubleTapped="Contents_DoubleTapped" SelectionChanged="Contents_SelectionChanged" RightTapped="Contents_RightTapped" Padding="0,4,0,0">
+                    <GridView.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" ItemWidth="196" ItemHeight="168" /></ItemsPanelTemplate></GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FolderItemViewModel">
+                            <Border Style="{StaticResource GlassCard}" Padding="20,18,16,16">
+                                <StackPanel Spacing="4">
+                                    <Image Width="56" Height="56" HorizontalAlignment="Left" Source="{x:Bind Icon, Mode=OneWay}" />
+                                    <TextBlock Text="{x:Bind Name}" FontSize="16" FontWeight="SemiBold" Margin="0,8,0,0" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind Subtitle, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                    <GridView.Footer>
+                        <Button x:Name="NewFolderCard" Width="184" Height="156" Margin="0,0,12,12" Padding="0" CornerRadius="14" Background="Transparent" BorderBrush="{StaticResource GlassStroke}" BorderThickness="1" Click="NewSubfolder_Click" AutomationProperties.Name="New folder">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <Border Width="44" Height="44" CornerRadius="22" Background="{StaticResource Glass}"><FontIcon Glyph="&#xE710;" FontSize="16" /></Border>
+                                <TextBlock Text="New Folder" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                <TextBlock Text="Keep things organized" FontSize="11" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            </StackPanel>
+                        </Button>
+                    </GridView.Footer>
+                </GridView>
+
+                <!-- Browsing: list view -->
+                <ListView Grid.Row="1" x:Name="ContentsList" ItemsSource="{x:Bind ViewModel.Contents, Mode=OneWay}" SelectionMode="Single"
+                          Visibility="Collapsed"
+                          ContainerContentChanging="Contents_ContainerContentChanging" DoubleTapped="Contents_DoubleTapped" SelectionChanged="Contents_SelectionChanged" RightTapped="Contents_RightTapped" Padding="0">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="MinHeight" Value="44" />
+                            <Setter Property="Padding" Value="12,0,12,0" />
+                            <Setter Property="CornerRadius" Value="10" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FolderItemViewModel">
+                            <Grid ColumnSpacing="12" Height="40">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="28" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Image Width="24" Height="24" VerticalAlignment="Center" Source="{x:Bind Icon, Mode=OneWay}" />
+                                <TextBlock Grid.Column="1" Text="{x:Bind Name}" FontSize="14" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="2" Text="{x:Bind Subtitle, Mode=OneWay}" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <ProgressRing Grid.Row="1" Width="28" Height="28" IsActive="{x:Bind ViewModel.ContentsLoading, Mode=OneWay}" />
+            </Grid>
+
+            <!-- Right: details -->
+            <ScrollViewer Grid.Column="2" Padding="12,16,24,16" BorderThickness="1,0,0,0" BorderBrush="{StaticResource GlassStroke}" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <Border Style="{StaticResource GlassCard}" Height="200">
+                        <Grid>
+                            <views:FolderBoxIcon x:Name="DetailIcon" Width="112" Height="112" />
+                            <Image x:Name="DetailImage" Width="96" Height="96" Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Name="DetailName" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock x:Name="DetailCount" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="DetailDescription" FontSize="13" Margin="0,6,0,0" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" />
+                    </StackPanel>
+                    <Border Height="1" Background="{StaticResource GlassStroke}" />
+                    <Grid RowSpacing="12" ColumnSpacing="12">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <FontIcon Grid.Row="0" Glyph="&#xE8B7;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Created" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" x:Name="DetailCreated" FontSize="13" />
+                        <FontIcon Grid.Row="1" Glyph="&#xE823;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Modified" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="1" Grid.Column="2" x:Name="DetailModified" FontSize="13" />
+                        <FontIcon Grid.Row="2" Glyph="&#xE8EC;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="Type" FontSize="13" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="2" Grid.Column="2" x:Name="DetailType" FontSize="13" />
+                    </Grid>
+
+                    <!-- Icon picker (FolderBox root only) -->
+                    <StackPanel x:Name="IconPicker" Spacing="8" Visibility="Collapsed">
+                        <Border Height="1" Background="{StaticResource GlassStroke}" />
+                        <TextBlock Text="Icon design" FontSize="13" FontWeight="SemiBold" />
+                        <ItemsControl x:Name="DesignList">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><VariableSizedWrapGrid Orientation="Horizontal" ItemWidth="50" ItemHeight="52" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                        <TextBlock Text="Colour" FontSize="13" FontWeight="SemiBold" />
+                        <ItemsControl x:Name="ColorList">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><VariableSizedWrapGrid Orientation="Horizontal" ItemWidth="38" ItemHeight="40" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

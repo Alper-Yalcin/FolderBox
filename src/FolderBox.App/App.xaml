@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="FolderBox.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- FolderBox folder glyph colours, derived from the Windows accent colour -->
+            <SolidColorBrush x:Key="FolderBoxIconBackBrush" Color="{ThemeResource SystemAccentColorDark1}" />
+            <SolidColorBrush x:Key="FolderBoxIconFrontBrush" Color="{ThemeResource SystemAccentColorLight1}" />
+
+            <!-- One settings row: label left, control right -->
+            <Style x:Key="SettingRow" TargetType="Grid">
+                <Setter Property="MinHeight" Value="52" />
+                <Setter Property="Padding" Value="16,8,16,8" />
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="6" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
