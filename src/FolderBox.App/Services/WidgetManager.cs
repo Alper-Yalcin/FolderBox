@@ -87,6 +87,17 @@ internal sealed class WidgetManager : IDisposable
         foreach (var widget in _document.Folders)
             CreateTile(widget);
         _host.EnsureOrder();
+        if (Directory.Exists(ManagedRoot)) EnsureRootIntegration();
+    }
+
+    /// <summary>
+    /// Managed folders are not on the Desktop, so file dialogs (VS Code "Open Folder", ...) would not show them.
+    /// Pin the root to Quick access (sidebar of every dialog) and give it the FolderBox icon.
+    /// </summary>
+    private void EnsureRootIntegration()
+    {
+        QuickAccessService.ApplyFolderIcon(ManagedRoot);
+        if (Settings.PinRootToQuickAccess) QuickAccessService.Pin(ManagedRoot);
     }
 
     private FolderTileWindow CreateTile(FolderWidget widget)
@@ -192,7 +203,9 @@ internal sealed class WidgetManager : IDisposable
     {
         try
         {
+            var rootExisted = Directory.Exists(ManagedRoot);
             Directory.CreateDirectory(ManagedRoot);
+            if (!rootExisted) EnsureRootIntegration();
             var name = "New FolderBox";
             var path = Path.Combine(ManagedRoot, name);
             for (int i = 2; Directory.Exists(path) || File.Exists(path); i++)
@@ -568,6 +581,11 @@ internal sealed class WidgetManager : IDisposable
         {
             if (Settings.AddToNewMenu) ShellNewIntegration.Register();
             else ShellNewIntegration.Unregister();
+        }
+        if (previous.PinRootToQuickAccess != Settings.PinRootToQuickAccess)
+        {
+            if (Settings.PinRootToQuickAccess) { Directory.CreateDirectory(ManagedRoot); EnsureRootIntegration(); }
+            else QuickAccessService.Unpin(ManagedRoot);
         }
         if (previous.ShowItemCount != Settings.ShowItemCount)
         {

@@ -51,6 +51,7 @@ internal sealed partial class SettingsWindow : Window
         ShowItemCount.IsOn = s.ShowItemCount;
         LockAll.IsOn = s.LockAllWidgets;
         AddToNewMenu.IsOn = s.AddToNewMenu;
+        PinQuickAccess.IsOn = s.PinRootToQuickAccess;
         GridWidth.Value = s.GridWidth;
         GridHeight.Value = s.GridHeight;
         PanelWidth.Value = s.PanelWidth;
@@ -72,6 +73,7 @@ internal sealed partial class SettingsWindow : Window
         s.ShowItemCount = ShowItemCount.IsOn;
         s.LockAllWidgets = LockAll.IsOn;
         s.AddToNewMenu = AddToNewMenu.IsOn;
+        s.PinRootToQuickAccess = PinQuickAccess.IsOn;
         s.GridWidth = ToInt(GridWidth.Value, s.GridWidth);
         s.GridHeight = ToInt(GridHeight.Value, s.GridHeight);
         s.PanelWidth = ToInt(PanelWidth.Value, s.PanelWidth);

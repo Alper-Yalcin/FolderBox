@@ -23,6 +23,8 @@ public sealed class AppSettings
     public bool AddToNewMenu { get; set; } = true;
     /// <summary>Set after the one-time Desktop launcher shortcut was created.</summary>
     public bool DesktopShortcutCreated { get; set; }
+    /// <summary>Pin the FolderBox root folder to Explorer's Quick access so every Open/Save dialog can reach it.</summary>
+    public bool PinRootToQuickAccess { get; set; } = true;
 
     // Layout (logical pixels)
     public int GridWidth { get; set; } = 110;

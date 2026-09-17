@@ -58,6 +58,13 @@
                     <ToggleSwitch x:Name="AddToNewMenu" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
                 </Grid>
                 <Grid Style="{StaticResource SettingRow}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Pin the FolderBox folder to Quick access" />
+                        <TextBlock Text="Shows your FolderBoxes in the sidebar of every Open / Save dialog" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                    <ToggleSwitch x:Name="PinQuickAccess" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
+                </Grid>
+                <Grid Style="{StaticResource SettingRow}">
                     <TextBlock Text="Lock all widgets" VerticalAlignment="Center" />
                     <ToggleSwitch x:Name="LockAll" HorizontalAlignment="Right" OnContent="" OffContent="" MinWidth="0" Toggled="Setting_Changed" />
                 </Grid>

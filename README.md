@@ -73,6 +73,8 @@ FolderBox only *shows* it.
 **Integration**
 - Right-click the desktop → **New → FolderBox**
 - Desktop launcher shortcut, tray icon, starts with Windows (all per-user, no admin rights)
+- The `FolderBox` folder is pinned to Quick access, so every Open / Save dialog (VS Code, Visual
+  Studio, Office, …) reaches your FolderBoxes from the sidebar
 - Follows the Windows light/dark theme and accent colour
 
 **Admin panel**
@@ -120,9 +122,10 @@ FolderBox only *shows* it.
 3. On first launch FolderBox
    - creates a **FolderBox** shortcut on your desktop,
    - registers **New → FolderBox** in the desktop context menu,
-   - registers itself to **start with Windows**.
+   - registers itself to **start with Windows**,
+   - pins the `FolderBox` folder to Explorer's **Quick access** (sidebar of every file dialog).
 
-   All three can be turned off in Settings; uninstalling removes them. Folders you created live in
+   All of these can be turned off in Settings; uninstalling removes them. Folders you created live in
    `%UserProfile%\FolderBox` and are never deleted by the uninstaller.
 
 ### Portable
@@ -195,7 +198,7 @@ src/
       FolderBoxIcon.xaml         vector icon designs
     ViewModels/
     Services/                    WidgetManager, IconStyles, StartupService, ShellNewIntegration,
-                                 DesktopShortcutService, ThemeService
+                                 DesktopShortcutService, QuickAccessService, ThemeService
     Shell/                       Win32 / COM integration (see below)
 tests/FolderBox.Core.Tests/      xUnit
 docs/images/                     README screenshots
@@ -241,7 +244,7 @@ Windows has no public "desktop widget" API, so FolderBox builds one from documen
 %LocalAppData%\FolderBox\folders.json    widgets: id, name, path, position, monitor, icon design/colour
 %LocalAppData%\FolderBox\settings.json   settings
 %LocalAppData%\FolderBox\Logs\           rolling logs (2 MB, 7 days)
-%UserProfile%\FolderBox\                 folders created through "New > FolderBox"
+%UserProfile%\FolderBox\                 folders created through "New > FolderBox" (pinned to Quick access)
 ```
 
 Writes are atomic (temp file + replace) with a `.bak` copy; unreadable files are kept as `.corrupt` and
