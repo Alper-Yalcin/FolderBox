@@ -116,9 +116,12 @@ FolderBox only *shows* it.
 
 ### Download (recommended)
 
-1. Grab the latest `FolderBox-Setup-x.y.z.exe` (or the portable `.zip`) from the
+1. Grab the latest `FolderBox-Setup-x.y.z.exe` (or `FolderBox-x.y.z-win-x64-portable.zip`) from the
    [Releases](../../releases/latest) page.
-2. Run it. The installer is per-user and needs no administrator rights.
+2. Run it. The installer is per-user, needs no administrator rights and installs to
+   `%LocalAppData%\Programs\FolderBox`. The installer is not code-signed yet, so SmartScreen may show
+   "Windows protected your PC" — click **More info → Run anyway** (SHA-256 checksums are attached to
+   every release).
 3. On first launch FolderBox
    - creates a **FolderBox** shortcut on your desktop,
    - registers **New → FolderBox** in the desktop context menu,
@@ -160,6 +163,9 @@ Notes:
 - The XAML compiler prints warning `WMC1509` on command-line builds; it is harmless.
 - Tests: `dotnet test tests\FolderBox.Core.Tests\FolderBox.Core.Tests.csproj` (49 xUnit tests covering
   layout, placement, persistence, watching and utilities).
+- Installer: `.uild.ps1 -Installer` builds `publish\FolderBox-Setup-<version>.exe` (needs
+  [Inno Setup 6](https://jrsoftware.org/isinfo.php)) and the portable zip. Pushing a `v*` tag runs the
+  same steps in GitHub Actions and attaches the files to a release.
 
 ### Command-line switches
 
@@ -177,7 +183,9 @@ desktop layer (handy for screenshots and UI automation).
 
 ```text
 FolderBox.sln
-build.ps1                        build + test + publish
+build.ps1                        build + test + publish (+ installer with -Installer)
+installer/FolderBox.iss          Inno Setup script (per-user, cleans up integrations on uninstall)
+.github/workflows/release.yml    tag -> build, test, installer, GitHub release
 src/
   FolderBox.Core/                .NET 9 class library, no UI dependencies (unit-tested)
     Models/                      FolderWidget, FolderItem, AppSettings, geometry, MonitorInfo, GridSpec
@@ -266,7 +274,7 @@ the backup is used. Nothing leaves your machine — no telemetry, no accounts, n
 - Background context menu in the panel (Paste, Properties)
 - Multi-select in the panel, optional thumbnails
 - Multiple simultaneously expanded panels
-- MSIX packaging alongside the installer
+- Code-signed installer, MSIX packaging alongside the installer
 
 ## Contributing
 

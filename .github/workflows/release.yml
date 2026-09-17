@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Version from tag
+        id: ver
+        shell: pwsh
+        run: |
+          $v = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}".TrimStart("v") } else { "0.0.0-ci" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Build, test, publish, installer
+        shell: pwsh
+        run: .\build.ps1 -Configuration Release -Installer -Version ${{ steps.ver.outputs.version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FolderBox-${{ steps.ver.outputs.version }}
+          path: |
+            publish/FolderBox-Setup-*.exe
+            publish/FolderBox-*-portable.zip
+            publish/*.sha256
+
+      - name: GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            publish/FolderBox-Setup-*.exe
+            publish/FolderBox-*-portable.zip
+            publish/*.sha256
+          generate_release_notes: true
